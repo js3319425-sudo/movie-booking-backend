@@ -169,15 +169,15 @@ const fetchMovie = async (req, res) => {
             filter.$or = [
                 {
                     movie_name: {
-                        regexp: search,
-                        option: 'i'
+                        $regex: search,
+                        $options: 'i'
                     }
                 },
 
                 {
                     language: {
-                        regexp: search,
-                        option: 'i'
+                        $regex: search,
+                        $options: 'i'
                     }
                 },
 
@@ -220,7 +220,6 @@ const fetchMovie = async (req, res) => {
         return apiError({ res, status: 500, message: "Internal server error", error: error?.message })
     }
 }
-
 
 module.exports = {
     addMovie,
