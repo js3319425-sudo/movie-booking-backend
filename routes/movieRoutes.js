@@ -13,7 +13,7 @@ route.post("/login", login)
 route.post("/addMovie", upload.single("image"), addMovieValidation, movieController.addMovie)
 route.post("/updateMovie/:id", upload.single("image"), addMovieValidation, movieController.updateMovie)
 route.post("/deleteMovie/:id", movieController.deleteMovie)
-route.get("/fetchMovieById/:id", movieController.fetchSingleMovie)
+route.get("/fetchMovieDetail", movieController.fetchSingleMovie)
 route.get("/fetchMovie", movieController.fetchMovie)
 
 

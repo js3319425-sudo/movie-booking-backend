@@ -138,17 +138,39 @@ const deleteMovie = async (req, res) => {
 
 const fetchSingleMovie = async (req, res) => {
     try {
-        const { id } = req.params
-
-        if (!id) {
-            return apiError({ res, status: 422, message: "id is required!" })
-        }
+        const { id } = req.query
 
         let db = getdb()
+        let movieData
 
-        const existData = await db.collection("movie").findOne({ _id: new ObjectId(id), status: 1 })
+        if (id) {
+            movieData = await db.collection("movie").findOne({ _id: new ObjectId(id), status: 1 })
+        }
+        else {
+            movieData = await db.collection("movie").aggregate([
+                {
+                    $match: {
+                        status: 1
+                    }
+                },
 
-        return apiResponse({ res, status: 200, message: existData?.movie_name ? "data fetch successfully!" : "data not found!", data: existData })
+                {
+                    $sort: {
+                        created_at: -1
+                    }
+                },
+
+                {
+                    $project: {
+                        movie_name: 1,
+                        _id: 1
+                    }
+                }
+
+            ]).toArray()
+        }
+
+        return apiResponse({ res, status: 200, message: movieData[0]?.movie_name || movieData?.movie_name ? "data fetch successfully!" : "data not found!", data: movieData })
     } catch (error) {
         return apiError({ res, status: 500, message: "Internal server error", error: error?.message })
     }

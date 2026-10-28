@@ -3,6 +3,7 @@ const { getdb } = require("../../db/db")
 const { apiError, apiResponse } = require("../../helpers/response")
 const { ObjectId } = require("mongodb")
 
+
 const addTheatre = async (req, res) => {
     try {
         const { Theatre_Name, location, address } = req.body
@@ -107,37 +108,16 @@ const deleteTheatre = async (req, res) => {
 
 const fetchSingleTheatre = async (req, res) => {
     try {
-        const { id } = req.query
+        const { id } = req.params
+
+        if (!id) {
+            return apiError({ res, status: 422, message: "Id is required!" })
+        }
 
         let db = getdb()
+        const singleTheatre = await db.collection("theatre").findOne({ status: 1, _id: new ObjectId(id) })
 
-        let theatreData
-        if (id) {
-            theatreData = await db.collection("theatre").findOne({ status: 1, _id: new ObjectId(id) })
-        }
-        else {
-            theatreData = await db.collection("theatre").aggregate([
-                {
-                    $match: {
-                        status: 1
-                    }
-                },
-                {
-                    $sort: {
-                        created_at: -1
-                    }
-                },
-                {
-                    $project: {
-                        Theatre_Name: 1,
-                        _id: 1
-                    }
-                }
-            ]).toArray()
-        }
-
-
-        return apiResponse({ res, status: 200, message: theatreData?.Theatre_Name ? "Data fetch successfully!" : "data not found!", data: theatreData })
+        return apiResponse({ res, status: 200, message: singleTheatre?.Theatre_Name ? "Data fetch successfully!" : "data not found!", data: singleTheatre })
     } catch (error) {
         return apiError({ res, status: 500, message: "Internal Server Error", error: error?.message })
     }
@@ -208,6 +188,7 @@ const fetchTheatre = async (req, res) => {
         return apiError({ res, status: 500, message: "Internal Server Error", error: error?.message })
     }
 }
+
 
 module.exports = {
     addTheatre,
